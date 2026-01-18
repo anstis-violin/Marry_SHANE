@@ -1,0 +1,31 @@
+# Phase 4 Training Requirements
+# 第四阶段训练所需的Python库
+
+# 基础数据处理
+numpy>=1.21.0
+pandas>=1.3.0
+
+# 可视化库
+matplotlib>=3.4.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# 三维可视化
+mpl_toolkits
+
+# 交互式可视化
+ipywidgets>=7.6.0
+jupyter>=1.0.0
+notebook>=6.4.0
+
+# 数据获取
+requests>=2.26.0
+beautifulsoup4>=4.9.0
+selenium>=4.0.0
+lxml>=4.6.0
+
+# 机器学习和模型评估
+scikit-learn>=1.0.0
+
+# 其他工具
+pillow>=8.3.0

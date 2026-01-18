@@ -17,11 +17,8 @@ from scipy import stats
 from datetime import datetime
 import os
 
-# 设置中文显示 - 强制使用微软雅黑
-import matplotlib
-matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'KaiTi', 'FangSong']
-matplotlib.rcParams['axes.unicode_minus'] = False
-plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'KaiTi', 'FangSong']
+# 设置中文显示
+plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 设置seaborn样式
@@ -569,7 +566,7 @@ class AdvancedVisualizer:
         self.generate_statistics_report()
         
         print("\n" + "="*60)
-        print("[SUCCESS] 所有可视化图表生成完成！")
+        print("✅ 所有可视化图表生成完成！")
         print(f"输出目录: {self.output_dir}")
         print("="*60)
 
