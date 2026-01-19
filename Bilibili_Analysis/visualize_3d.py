@@ -17,9 +17,13 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import os
 
-# 设置中文字体
+# 设置中文字体和全局字体大小
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei']
 plt.rcParams['axes.unicode_minus'] = False
+plt.rcParams['font.size'] = 12  # 全局字体大小
+plt.rcParams['axes.labelsize'] = 14  # 坐标轴标签大小
+plt.rcParams['axes.titlesize'] = 16  # 子图标题大小
+plt.rcParams['legend.fontsize'] = 12  # 图例字体大小
 
 print("=" * 70)
 print("B站数据三维可视化")
