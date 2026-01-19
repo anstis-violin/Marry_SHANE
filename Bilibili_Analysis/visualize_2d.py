@@ -18,10 +18,16 @@ import numpy as np
 from matplotlib import cm
 import os
 
-# 设置中文字体
+# 设置中文字体和全局字体大小
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 plt.rcParams['figure.dpi'] = 100
+plt.rcParams['font.size'] = 11  # 全局字体大小
+plt.rcParams['axes.labelsize'] = 13  # 坐标轴标签大小
+plt.rcParams['axes.titlesize'] = 15  # 子图标题大小
+plt.rcParams['xtick.labelsize'] = 11  # x轴刻度标签大小
+plt.rcParams['ytick.labelsize'] = 11  # y轴刻度标签大小
+plt.rcParams['legend.fontsize'] = 11  # 图例字体大小
 
 print("=" * 70)
 print("B站数据二维可视化")
@@ -49,35 +55,41 @@ fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 
 # 1.1 播放量直方图
 axes[0, 0].hist(df['播放量'], bins=30, color='skyblue', edgecolor='black', alpha=0.7)
-axes[0, 0].set_xlabel('播放量', fontsize=12)
-axes[0, 0].set_ylabel('视频数量', fontsize=12)
-axes[0, 0].set_title('播放量分布直方图', fontsize=14, fontweight='bold')
+axes[0, 0].set_xlabel('播放量', fontsize=14)
+axes[0, 0].set_ylabel('视频数量', fontsize=14)
+axes[0, 0].set_title('播放量分布直方图', fontsize=16, fontweight='bold')
+axes[0, 0].tick_params(axis='both', labelsize=12)
 axes[0, 0].grid(True, alpha=0.3)
 
-# 1.2 播放量箱线图（按分区）
-df.boxplot(column='播放量', by='排行榜分区', ax=axes[0, 1])
-axes[0, 1].set_xlabel('分区', fontsize=12)
-axes[0, 1].set_ylabel('播放量', fontsize=12)
-axes[0, 1].set_title('各分区播放量分布', fontsize=14, fontweight='bold')
+# 1.2 播放量箱线图（按分区）- 转换为万为单位
+df_copy = df.copy()
+df_copy['播放量_万'] = df_copy['播放量'] / 10000
+df_copy.boxplot(column='播放量_万', by='排行榜分区', ax=axes[0, 1])
+axes[0, 1].set_xlabel('分区', fontsize=14)
+axes[0, 1].set_ylabel('播放量（万）', fontsize=14)
+axes[0, 1].set_title('各分区播放量分布', fontsize=16, fontweight='bold')
+axes[0, 1].tick_params(axis='both', labelsize=14)
 plt.sca(axes[0, 1])
-plt.xticks(rotation=45)
+plt.xticks(rotation=45, ha='right')
 
-# 1.3 Top 20 视频播放量
+# 1.3 Top 20 视频播放量 - 转换为万为单位
 top20 = df.nlargest(20, '播放量')
-axes[1, 0].barh(range(20), top20['播放量'].values, color='coral')
+top20_views_wan = top20['播放量'].values / 10000
+axes[1, 0].barh(range(20), top20_views_wan, color='coral')
 axes[1, 0].set_yticks(range(20))
 axes[1, 0].set_yticklabels([title[:15]+'...' if len(title)>15 else title 
-                            for title in top20['标题'].values], fontsize=9)
-axes[1, 0].set_xlabel('播放量', fontsize=12)
-axes[1, 0].set_title('Top 20 热门视频', fontsize=14, fontweight='bold')
+                            for title in top20['标题'].values], fontsize=11)
+axes[1, 0].set_xlabel('播放量（万）', fontsize=14)
+axes[1, 0].set_title('Top 20 热门视频', fontsize=16, fontweight='bold')
+axes[1, 0].tick_params(axis='x', labelsize=14)
 axes[1, 0].grid(True, alpha=0.3, axis='x')
 
 # 1.4 分区播放量占比
 category_views = df.groupby('排行榜分区')['播放量'].sum()
 colors = plt.cm.Set3(range(len(category_views)))
 axes[1, 1].pie(category_views.values, labels=category_views.index, autopct='%1.1f%%',
-              colors=colors, startangle=90)
-axes[1, 1].set_title('各分区播放量占比', fontsize=14, fontweight='bold')
+              colors=colors, startangle=90, textprops={'fontsize': 13})
+axes[1, 1].set_title('各分区播放量占比', fontsize=16, fontweight='bold')
 
 plt.tight_layout()
 plt.savefig('visualizations/01_播放量分析.png', dpi=300, bbox_inches='tight')
@@ -91,12 +103,13 @@ print("\n[3/8] 生成互动数据分析图...")
 
 fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 
-# 2.1 点赞数 vs 播放量
-axes[0, 0].scatter(df['播放量'], df['点赞数'], alpha=0.5, c=df['投币数'], 
+# 2.1 点赞数 vs 播放量 - 转换为万为单位
+axes[0, 0].scatter(df['播放量']/10000, df['点赞数']/10000, alpha=0.5, c=df['投币数'], 
                   cmap='viridis', s=50)
-axes[0, 0].set_xlabel('播放量', fontsize=12)
-axes[0, 0].set_ylabel('点赞数', fontsize=12)
-axes[0, 0].set_title('播放量 vs 点赞数', fontsize=14, fontweight='bold')
+axes[0, 0].set_xlabel('播放量（万）', fontsize=14)
+axes[0, 0].set_ylabel('点赞数（万）', fontsize=14)
+axes[0, 0].set_title('播放量 vs 点赞数', fontsize=16, fontweight='bold')
+axes[0, 0].tick_params(axis='both', labelsize=14)
 axes[0, 0].grid(True, alpha=0.3)
 
 # 2.2 互动率对比
@@ -111,13 +124,14 @@ for bar in bars:
     axes[0, 1].text(bar.get_x() + bar.get_width()/2., height,
                    f'{height:.2%}', ha='center', va='bottom', fontsize=11)
 
-# 2.3 各分区互动数据
-category_interaction = df.groupby('排行榜分区')[['点赞数', '投币数', '收藏数']].sum()
+# 2.3 各分区互动数据 - 转换为万为单位
+category_interaction = df.groupby('排行榜分区')[['点赞数', '投币数', '收藏数']].sum() / 10000
 category_interaction.plot(kind='bar', ax=axes[1, 0], width=0.8)
-axes[1, 0].set_xlabel('分区', fontsize=12)
-axes[1, 0].set_ylabel('数量', fontsize=12)
-axes[1, 0].set_title('各分区互动数据对比', fontsize=14, fontweight='bold')
-axes[1, 0].legend(['点赞数', '投币数', '收藏数'], fontsize=10)
+axes[1, 0].set_xlabel('分区', fontsize=14)
+axes[1, 0].set_ylabel('数量（万）', fontsize=14)
+axes[1, 0].set_title('各分区互动数据对比', fontsize=16, fontweight='bold')
+axes[1, 0].legend(['点赞数', '投币数', '收藏数'], fontsize=12)
+axes[1, 0].tick_params(axis='both', labelsize=14)
 axes[1, 0].grid(True, alpha=0.3, axis='y')
 plt.sca(axes[1, 0])
 plt.xticks(rotation=45)
@@ -144,34 +158,42 @@ fig, axes = plt.subplots(2, 2, figsize=(16, 12))
 top_uploader = df['UP主'].value_counts().head(15)
 axes[0, 0].barh(range(15), top_uploader.values, color='lightgreen')
 axes[0, 0].set_yticks(range(15))
-axes[0, 0].set_yticklabels(top_uploader.index, fontsize=10)
-axes[0, 0].set_xlabel('视频数量', fontsize=12)
-axes[0, 0].set_title('Top 15 高产UP主', fontsize=14, fontweight='bold')
+axes[0, 0].set_yticklabels(top_uploader.index, fontsize=12)
+axes[0, 0].set_xlabel('视频数量', fontsize=16)
+axes[0, 0].set_title('Top 15 高产UP主', fontsize=16, fontweight='bold')
+axes[0, 0].tick_params(axis='x', labelsize=16)  # 增大X轴刻度
 axes[0, 0].grid(True, alpha=0.3, axis='x')
 
 # 3.2 Top 15 UP主（按总播放量）
 uploader_views = df.groupby('UP主')['播放量'].sum().nlargest(15)
-axes[0, 1].barh(range(15), uploader_views.values, color='salmon')
+# 转换为万为单位
+uploader_views_wan = uploader_views / 10000
+axes[0, 1].barh(range(15), uploader_views_wan.values, color='salmon')
 axes[0, 1].set_yticks(range(15))
-axes[0, 1].set_yticklabels(uploader_views.index, fontsize=10)
-axes[0, 1].set_xlabel('总播放量', fontsize=12)
-axes[0, 1].set_title('Top 15 热门UP主（按播放量）', fontsize=14, fontweight='bold')
+axes[0, 1].set_yticklabels(uploader_views.index, fontsize=12)
+axes[0, 1].set_xlabel('总播放量（万）', fontsize=14)
+axes[0, 1].set_title('Top 15 热门UP主（按播放量）', fontsize=16, fontweight='bold')
+axes[0, 1].tick_params(axis='x', labelsize=14)
 axes[0, 1].grid(True, alpha=0.3, axis='x')
 
 # 3.3 UP主平均播放量分布
 uploader_avg = df.groupby('UP主')['播放量'].mean()
-axes[1, 0].hist(uploader_avg, bins=30, color='plum', edgecolor='black', alpha=0.7)
-axes[1, 0].set_xlabel('平均播放量', fontsize=12)
-axes[1, 0].set_ylabel('UP主数量', fontsize=12)
-axes[1, 0].set_title('UP主平均播放量分布', fontsize=14, fontweight='bold')
+# 转换为万为单位
+uploader_avg_wan = uploader_avg / 10000
+axes[1, 0].hist(uploader_avg_wan, bins=30, color='plum', edgecolor='black', alpha=0.7)
+axes[1, 0].set_xlabel('平均播放量（万）', fontsize=14)
+axes[1, 0].set_ylabel('UP主数量', fontsize=14)
+axes[1, 0].set_title('UP主平均播放量分布', fontsize=16, fontweight='bold')
+axes[1, 0].tick_params(axis='both', labelsize=14)
 axes[1, 0].grid(True, alpha=0.3)
 
 # 3.4 UP主视频数量分布
 video_counts = df['UP主'].value_counts()
 axes[1, 1].hist(video_counts, bins=20, color='gold', edgecolor='black', alpha=0.7)
-axes[1, 1].set_xlabel('视频数量', fontsize=12)
-axes[1, 1].set_ylabel('UP主数量', fontsize=12)
-axes[1, 1].set_title('UP主视频数量分布', fontsize=14, fontweight='bold')
+axes[1, 1].set_xlabel('视频数量', fontsize=16)
+axes[1, 1].set_ylabel('UP主数量', fontsize=16)
+axes[1, 1].set_title('UP主视频数量分布', fontsize=16, fontweight='bold')
+axes[1, 1].tick_params(axis='both', labelsize=16)  # 增大刻度标签
 axes[1, 1].grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -219,10 +241,10 @@ for idx, (_, row) in enumerate(category_stats.iterrows()):
     ax.fill(angles, values, alpha=0.15, color=colors[idx % len(colors)])
 
 ax.set_xticks(angles[:-1])
-ax.set_xticklabels(categories, fontsize=12)
+ax.set_xticklabels(categories, fontsize=14)
 ax.set_ylim(0, 1)
-ax.set_title('各分区数据对比雷达图', fontsize=16, fontweight='bold', pad=20)
-ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), fontsize=11)
+ax.set_title('各分区数据对比雷达图', fontsize=18, fontweight='bold', pad=20)
+ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), fontsize=13)
 ax.grid(True, linestyle='--', alpha=0.7)
 
 plt.tight_layout()
@@ -263,27 +285,30 @@ ax1.text(0.1, 0.9, stats_text, fontsize=11, verticalalignment='top',
 ax2 = fig.add_subplot(gs[0, 1:])
 category_counts = df['排行榜分区'].value_counts()
 bars = ax2.bar(category_counts.index, category_counts.values, color='skyblue', edgecolor='black')
-ax2.set_ylabel('视频数量', fontsize=11)
-ax2.set_title('各分区视频数量', fontsize=13, fontweight='bold')
+ax2.set_ylabel('视频数量', fontsize=16)
+ax2.set_title('各分区视频数量', fontsize=16, fontweight='bold')
+ax2.tick_params(axis='both', labelsize=16)  # 增大刻度标签
+ax2.tick_params(axis='y', labelsize=18)  # Y轴刻度更大
 ax2.grid(True, alpha=0.3, axis='y')
 for bar in bars:
     height = bar.get_height()
     ax2.text(bar.get_x() + bar.get_width()/2., height,
-            f'{int(height)}', ha='center', va='bottom', fontsize=10)
+            f'{int(height)}', ha='center', va='bottom', fontsize=14)
 
-# 5.3 播放量Top 10
+# 5.3 播放量Top 10 - 转换为万为单位
 ax3 = fig.add_subplot(gs[1, :])
 top10 = df.nlargest(10, '播放量')
 x = range(10)
 width = 0.25
-ax3.bar([i-width for i in x], top10['播放量'].values, width, label='播放量', color='#FF6B6B')
-ax3.bar(x, top10['点赞数'].values, width, label='点赞数', color='#4ECDC4')
-ax3.bar([i+width for i in x], top10['投币数'].values, width, label='投币数', color='#45B7D1')
+ax3.bar([i-width for i in x], top10['播放量'].values/10000, width, label='播放量', color='#FF6B6B')
+ax3.bar(x, top10['点赞数'].values/10000, width, label='点赞数', color='#4ECDC4')
+ax3.bar([i+width for i in x], top10['投币数'].values/10000, width, label='投币数', color='#45B7D1')
 ax3.set_xticks(x)
-ax3.set_xticklabels([title[:10]+'...' for title in top10['标题'].values], rotation=45, ha='right', fontsize=9)
-ax3.set_ylabel('数量', fontsize=11)
-ax3.set_title('Top 10 热门视频数据对比', fontsize=13, fontweight='bold')
-ax3.legend(fontsize=10)
+ax3.set_xticklabels([title[:10]+'...' for title in top10['标题'].values], rotation=45, ha='right', fontsize=11)
+ax3.set_ylabel('数量（万）', fontsize=14)
+ax3.set_title('Top 10 热门视频数据对比', fontsize=16, fontweight='bold')
+ax3.tick_params(axis='y', labelsize=14)  # 增大y轴刻度
+ax3.legend(fontsize=12)
 ax3.grid(True, alpha=0.3, axis='y')
 
 # 5.4 互动率分布
@@ -299,19 +324,22 @@ ax4.grid(True, alpha=0.3, axis='y')
 # 5.5 时长分布
 ax5 = fig.add_subplot(gs[2, 1])
 ax5.hist(df['时长分钟'], bins=30, color='lightcoral', edgecolor='black', alpha=0.7)
-ax5.set_xlabel('时长（分钟）', fontsize=11)
-ax5.set_ylabel('视频数量', fontsize=11)
-ax5.set_title('视频时长分布', fontsize=13, fontweight='bold')
+ax5.set_xlabel('时长（分钟）', fontsize=14)
+ax5.set_ylabel('视频数量', fontsize=14)
+ax5.set_title('视频时长分布', fontsize=16, fontweight='bold')
+ax5.tick_params(axis='both', labelsize=13)  # 增大刻度标签
 ax5.grid(True, alpha=0.3)
 
-# 5.6 分区平均播放量
+# 5.6 分区平均播放量 - 转换为万为单位
 ax6 = fig.add_subplot(gs[2, 2])
 category_avg = df.groupby('排行榜分区')['播放量'].mean().sort_values(ascending=True)
-ax6.barh(range(len(category_avg)), category_avg.values, color='lightgreen')
-ax6.set_yticks(range(len(category_avg)))
-ax6.set_yticklabels(category_avg.index, fontsize=10)
-ax6.set_xlabel('平均播放量', fontsize=11)
-ax6.set_title('各分区平均播放量', fontsize=13, fontweight='bold')
+category_avg_wan = category_avg / 10000
+ax6.barh(range(len(category_avg_wan)), category_avg_wan.values, color='lightgreen')
+ax6.set_yticks(range(len(category_avg_wan)))
+ax6.set_yticklabels(category_avg_wan.index, fontsize=11)
+ax6.set_xlabel('平均播放量（万）', fontsize=14)
+ax6.set_title('各分区平均播放量', fontsize=16, fontweight='bold')
+ax6.tick_params(axis='x', labelsize=14)
 ax6.grid(True, alpha=0.3, axis='x')
 
 plt.suptitle('B站热门视频综合数据仪表盘', fontsize=18, fontweight='bold', y=0.995)
